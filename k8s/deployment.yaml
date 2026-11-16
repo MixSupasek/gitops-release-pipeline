@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: release-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: release-api
+  template:
+    metadata:
+      labels:
+        app: release-api
+    spec:
+      containers:
+        - name: api
+          image: release-api:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080

@@ -1,0 +1,37 @@
+name: Publish release API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - app.py
+      - Dockerfile
+      - .github/workflows/publish.yml
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Build and test image
+        run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}"
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+          docker build -t "$image" .
+          docker run -d -p 127.0.0.1:8080:8080 "$image"
+          curl --fail --show-error --retry 10 --retry-connrefused http://127.0.0.1:8080/health
+
+      - name: Push image to GHCR
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker push "$IMAGE"
+          echo "$IMAGE" >> "$GITHUB_STEP_SUMMARY"
