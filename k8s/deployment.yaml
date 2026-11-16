@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: release-api:v1
+          image: ghcr.io/mixsupasek/gitops-release-pipeline:fd700249d6e09c38e10f672bef70499d7a030cfa
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
