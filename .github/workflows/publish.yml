@@ -25,8 +25,13 @@ jobs:
           image="ghcr.io/${GITHUB_REPOSITORY,,}:${GITHUB_SHA}"
           echo "IMAGE=$image" >> "$GITHUB_ENV"
           docker build -t "$image" .
-          docker run -d -p 127.0.0.1:8080:8080 "$image"
-          curl --fail --show-error --retry 10 --retry-connrefused http://127.0.0.1:8080/health
+          docker run -d --name release-api-test -p 127.0.0.1:8080:8080 "$image"
+          curl --fail --silent --show-error \
+            --retry 10 --retry-all-errors --retry-delay 1 --max-time 2 \
+            http://127.0.0.1:8080/health || {
+              docker logs release-api-test
+              exit 1
+            }
 
       - name: Push image to GHCR
         env:
