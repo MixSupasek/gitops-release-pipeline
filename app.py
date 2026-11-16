@@ -1,7 +1,7 @@
 import json
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-VERSION = "v1"
+VERSION = "v2"
 
 
 class ApiHandler(BaseHTTPRequestHandler):
